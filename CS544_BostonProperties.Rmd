@@ -1,0 +1,81 @@
+---
+title: "Analysis of Boston Properties"
+author: "Dawn Graham, Sylvie Xiang"
+output:
+  html_document:
+    fig_width: 8
+    code_folding: hide
+    highlight: tango
+    toc: true
+    toc_float:
+      collapsed: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=8, fig.height=4,
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+
+# The Data Set
+
+# Preparing the data
+- Import the data set into R.
+- Document the steps for the import process and any preprocessing had
+to be done prior to or after the import. Any R code used in the process
+should be included.
+
+## 2021 Data
+```{r echo=TRUE}
+pa21 <- read.csv("data2021-full.csv")
+
+# Get only desired columns
+cols <- c("PID", "CITY", "LUC", "OWN_OCC", "LIVING_AREA", "TOTAL_VALUE", "YR_BUILT", "OVERALL_COND", "BED_RMS", "FULL_BTH")
+
+pa21 <- pa21[, cols]
+
+# Get only "SINGLE FAM DWELLING"
+pa21 <- pa21[pa21$LUC==101,]
+
+# Convert string "$ddd,ddd.dd" to numeric
+pa21$TOTAL_VALUE <- as.numeric(gsub('[$,]', '', pa21$TOTAL_VALUE))
+
+summary(pa21)
+```
+
+## 2019 Data
+```{r echo=TRUE}
+pa19 <- read.csv("fy19fullpropassess.csv")
+
+# Get only desired columns
+cols <- c("PID", "ZIPCODE", "PTYPE", "OWN_OCC", "LIVING_AREA", "AV_TOTAL", "YR_BUILT", "R_OVRALL_CND", "R_BDRMS", "R_FULL_BTH")
+
+pa19 <- pa19[, cols]
+
+# Get only "SINGLE FAM DWELLING"
+pa19 <- pa19[pa19$PTYPE==101,]
+
+# Convert string "$ddd,ddd.dd" to numeric
+pa19$AV_TOTAL <- as.numeric(gsub('[$,]', '', pa19$AV_TOTAL))
+
+summary(pa19)
+```
+
+# Analyzing the data
+
+## Analysis
+- Do the analysis as in Module3 for at least one categorical variable and at least one numerical variable. Show appropriate plots for your data.
+- Do the analysis as in Module3 for at least one set of two or more variables. Show appropriate plots for your data.
+
+## Distribution
+- Pick one variable with numerical data and examine the distribution of the data.
+
+## Central Limit Theorem
+- Draw various random samples of the data and show the applicability of the
+Central Limit Theorem for this variable.
+
+## Sampling
+- Show how various sampling methods can be used on your data. What are your
+conclusions if these samples are used instead of the whole dataset.
+- Implementation of any feature(s) not mentioned in the above specification.
