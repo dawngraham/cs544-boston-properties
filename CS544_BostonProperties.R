@@ -2,7 +2,7 @@
 ## Sylvie Xiang, Dawn Graham
 
 ## 2021
-pa21 <- read.csv("data2021-full.csv")
+pa21 <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-properties/main/data/data2021-full.csv")
 
 # Get only desired columns
 cols <- c("PID", "CITY", "ZIPCODE", "LUC", "OWN_OCC", "LIVING_AREA", "TOTAL_VALUE", "YR_BUILT", "OVERALL_COND", "BED_RMS", "FULL_BTH")
@@ -21,7 +21,7 @@ summary(pa21)
 
 ## 2019
 
-pa19 <- read.csv("fy19fullpropassess.csv")
+pa19 <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-properties/main/data/fy19fullpropassess.csv")
 
 # Get only desired columns
 cols <- c("PID", "ZIPCODE", "PTYPE", "OWN_OCC", "LIVING_AREA", "AV_TOTAL", "YR_BUILT", "R_OVRALL_CND", "R_BDRMS", "R_FULL_BTH")
