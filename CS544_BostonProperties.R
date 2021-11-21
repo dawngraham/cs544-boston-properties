@@ -4,25 +4,8 @@
 library(plotly)
 library(plyr)
 
-## 2021
-pa <- read.csv("https://data.boston.gov/dataset/e02c44d2-3c64-459c-8fe2-e1ce5f38a035/resource/c4b7331e-e213-45a5-adda-052e4dd31d41/download/data2021-full.csv",
-               colClasses=c("ZIPCODE"="character"))
-
-# Get only desired columns
-cols <- c("PID", "CITY", "ZIPCODE", "LU_DESC", "OWN_OCC", "LIVING_AREA", "TOTAL_VALUE", "YR_BUILT", "EXT_COND", "BED_RMS", "FULL_BTH")
-
-pa <- pa[, cols]
-
-# Get only "SINGLE FAM DWELLING"
-pa <- pa[pa$LU_DESC=="SINGLE FAM DWELLING",]
-
-# Convert string "$ddd,ddd.dd" to numeric
-pa$TOTAL_VALUE <- as.numeric(gsub('[$,]', '', pa$TOTAL_VALUE))
-
-# Map values for OWN_OCC
-pa$OWN_OCC <- mapvalues(pa$OWN_OCC,
-                        from=c("Y", "N"),
-                        to=c("Yes", "No"))
+## Read in data
+pa <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-properties/main/pa.csv",colClasses=c("ZIPCODE"="character"))
 
 summary(pa)
 
@@ -32,6 +15,11 @@ summary(pa)
 # Categorical variable: YR_BUILT (Sylvie)
 
 # Categorical variable: OWN_OCC (Dawn)
+# Map values for OWN_OCC
+pa$OWN_OCC <- mapvalues(pa$OWN_OCC,
+                        from=c("Y", "N"),
+                        to=c("Yes", "No"))
+
 own_occ <- table(pa$OWN_OCC)
 
 prop.table(own_occ)*100
@@ -64,10 +52,23 @@ plot_ly(x = full_bth_names,
 #Do the analysis as in Module3 for at least one set of two or more variables. Show appropriate plots for your data.
 
 # CITY & TOTAL_VALUE (Dawn)
-plot_ly(pa,
-        x = ~CITY,
-        y = ~TOTAL_VALUE,
-        type = "bar")
+fig <- plot_ly(pa, y = ~VALUE_2021, color = ~CITY, type = "box")
+fig <- fig %>% layout(title = "2021 Total Assessment Values",
+                      yaxis = list(title = ""))
+fig
+
+pa$AMT_CHANGE <- pa$VALUE_2021 - pa$VALUE_2015
+pa$PCT_CHANGE <- round(pa$AMT_CHANGE / pa$VALUE_2015 * 100)
+
+fig <- plot_ly(pa, y = ~PCT_CHANGE, color = ~CITY, type = "box")
+fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 (%)",
+                      yaxis = list(title = "Change in Percentage"))
+fig
+
+fig <- plot_ly(pa, y = ~AMT_CHANGE, color = ~CITY, type = "box")
+fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 ($)",
+                      yaxis = list(title = "Change in Dollars"))
+fig
 
 # LIVING_AREA, EXT_COND & TOTAL_VALUE (Sylvie)
 
@@ -75,8 +76,18 @@ plot_ly(pa,
 #Pick one variable with numerical data and examine the distribution of the data.
 
 # TOTAL_VALUE (Dawn)
+fig <- plot_ly(pa, y=pa$VALUE_2015, type = "box", name="2015")
+fig <- fig %>% add_trace(pa, y=pa$VALUE_2016, name="2016")
+fig <- fig %>% add_trace(pa, y=pa$VALUE_2017, name="2017")
+fig <- fig %>% add_trace(pa, y=pa$VALUE_2018, name="2018")
+fig <- fig %>% add_trace(pa, y=pa$VALUE_2019, name="2019")
+fig <- fig %>% add_trace(pa, y=pa$VALUE_2020, name="2020")
+fig <- fig %>% add_trace(pa, y=pa$VALUE_2021, name="2021")
+fig <- fig %>% layout(title = "2021 Total Assessment Values")
+fig
+
 plot_ly(pa,
-        x = ~TOTAL_VALUE,
+        x = ~VALUE_2021,
         type = "histogram")
 
 ## Central Limit Theorem
