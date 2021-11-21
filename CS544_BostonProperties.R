@@ -1,47 +1,92 @@
 ## CS544 Final Project: Analysis of Boston Property Assessments
 ## Sylvie Xiang, Dawn Graham
 
+library(plotly)
+library(plyr)
+
 ## 2021
-pa21 <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-properties/main/data/data2021-full.csv")
+pa <- read.csv("https://data.boston.gov/dataset/e02c44d2-3c64-459c-8fe2-e1ce5f38a035/resource/c4b7331e-e213-45a5-adda-052e4dd31d41/download/data2021-full.csv",
+               colClasses=c("ZIPCODE"="character"))
 
 # Get only desired columns
-cols <- c("PID", "CITY", "ZIPCODE", "LUC", "OWN_OCC", "LIVING_AREA", "TOTAL_VALUE", "YR_BUILT", "OVERALL_COND", "BED_RMS", "FULL_BTH")
+cols <- c("PID", "CITY", "ZIPCODE", "LU_DESC", "OWN_OCC", "LIVING_AREA", "TOTAL_VALUE", "YR_BUILT", "EXT_COND", "BED_RMS", "FULL_BTH")
 
-# CITY is not included in 2019 data
-
-pa21 <- pa21[, cols]
+pa <- pa[, cols]
 
 # Get only "SINGLE FAM DWELLING"
-pa21 <- pa21[pa21$LUC==101,]
+pa <- pa[pa$LU_DESC=="SINGLE FAM DWELLING",]
 
 # Convert string "$ddd,ddd.dd" to numeric
-pa21$TOTAL_VALUE <- as.numeric(gsub('[$,]', '', pa21$TOTAL_VALUE))
+pa$TOTAL_VALUE <- as.numeric(gsub('[$,]', '', pa$TOTAL_VALUE))
 
-summary(pa21)
+# Map values for OWN_OCC
+pa$OWN_OCC <- mapvalues(pa$OWN_OCC,
+                        from=c("Y", "N"),
+                        to=c("Yes", "No"))
 
-## 2019
+summary(pa)
 
-pa19 <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-properties/main/data/fy19fullpropassess.csv")
+## Analysis
+#Do the analysis as in Module3 for at least one categorical variable and at least one numerical variable. Show appropriate plots for your data.
 
-# Get only desired columns
-cols <- c("PID", "ZIPCODE", "PTYPE", "OWN_OCC", "LIVING_AREA", "AV_TOTAL", "YR_BUILT", "R_OVRALL_CND", "R_BDRMS", "R_FULL_BTH")
+# Categorical variable: YR_BUILT (Sylvie)
 
-# ZIPCODE would need to be cleaned for 2019 - missing leading 0's
-# LUC in 2021 is PTYPE in 2019
-# TOTAL_VALUE in 2021 is AV_TOTAL in 2019
-# OVERALL_COND in 2021 is R_OVRALL_CND in 2019
-# BED_RMS in 2021 is R_BDRMS in 2019
-# FULL_BTH in 2021 is R_FULL_BTH in 2019
+# Categorical variable: OWN_OCC (Dawn)
+own_occ <- table(pa$OWN_OCC)
 
-pa19 <- pa19[, cols]
+prop.table(own_occ)*100
 
-# Get only "SINGLE FAM DWELLING"
-pa19 <- pa19[pa19$PTYPE==101,]
+plot_ly(x = names(own_occ),
+        y = as.numeric(own_occ),
+        type = "bar"
+        ) %>%
+  layout(title = "Owner Occupied",
+         xaxis = list(categoryorder = "category descending"),
+         yaxis = list(title = "Single Family Dwellings")
+         )
 
-# Convert string "$ddd,ddd.dd" to numeric
-pa19$AV_TOTAL <- as.numeric(gsub('[$,]', '', pa19$AV_TOTAL))
+# Numerical variable: BED_RMS (Sylvie)
 
-summary(pa19)
+# Numerical variable: FULL_BTH (Dawn)
+full_bth <- table(pa$FULL_BTH)
+full_bth_names <- as.numeric(names(full_bth))
 
+plot_ly(x = full_bth_names,
+        y = as.numeric(full_bth),
+        type = "bar"
+        )%>%
+  layout(title = "Full Bathrooms",
+         xaxis = list(title = "Bathrooms",
+                      tickvals = seq(1:max(full_bth_names))),
+         yaxis = list(title = "Single Family Dwellings")
+  )
 
+#Do the analysis as in Module3 for at least one set of two or more variables. Show appropriate plots for your data.
 
+# CITY & TOTAL_VALUE (Dawn)
+plot_ly(pa,
+        x = ~CITY,
+        y = ~TOTAL_VALUE,
+        type = "bar")
+
+# LIVING_AREA, EXT_COND & TOTAL_VALUE (Sylvie)
+
+## Distribution
+#Pick one variable with numerical data and examine the distribution of the data.
+
+# TOTAL_VALUE (Dawn)
+plot_ly(pa,
+        x = ~TOTAL_VALUE,
+        type = "histogram")
+
+## Central Limit Theorem
+#Draw various random samples of the data and show the applicability of the Central Limit Theorem for this variable.
+
+# TOTAL_VALUE (Sylvie)
+
+## Sampling
+#Show how various sampling methods can be used on your data. What are your conclusions if these samples are used instead of the whole dataset.
+
+# Simple random sampling (Sylvie)
+
+# Systematic (Dawn)

@@ -26,46 +26,71 @@ knitr::opts_chunk$set(fig.width=8, fig.height=4,
 to be done prior to or after the import. Any R code used in the process
 should be included.
 
-## 2021 Data
+## 2021 Boston Property Assessment Data
 ```{r echo=TRUE}
-pa21 <- read.csv("data2021-full.csv")
+library(plotly)
+library(plyr)
+
+pa <- read.csv("https://data.boston.gov/dataset/e02c44d2-3c64-459c-8fe2-e1ce5f38a035/resource/c4b7331e-e213-45a5-adda-052e4dd31d41/download/data2021-full.csv",
+               colClasses=c("ZIPCODE"="character"))
 
 # Get only desired columns
-cols <- c("PID", "CITY", "LUC", "OWN_OCC", "LIVING_AREA", "TOTAL_VALUE", "YR_BUILT", "OVERALL_COND", "BED_RMS", "FULL_BTH")
+cols <- c("PID", "CITY", "ZIPCODE", "LU_DESC", "OWN_OCC", "LIVING_AREA", "TOTAL_VALUE", "YR_BUILT", "EXT_COND", "BED_RMS", "FULL_BTH")
 
-pa21 <- pa21[, cols]
-
-# Get only "SINGLE FAM DWELLING"
-pa21 <- pa21[pa21$LUC==101,]
-
-# Convert string "$ddd,ddd.dd" to numeric
-pa21$TOTAL_VALUE <- as.numeric(gsub('[$,]', '', pa21$TOTAL_VALUE))
-
-summary(pa21)
-```
-
-## 2019 Data
-```{r echo=TRUE}
-pa19 <- read.csv("fy19fullpropassess.csv")
-
-# Get only desired columns
-cols <- c("PID", "ZIPCODE", "PTYPE", "OWN_OCC", "LIVING_AREA", "AV_TOTAL", "YR_BUILT", "R_OVRALL_CND", "R_BDRMS", "R_FULL_BTH")
-
-pa19 <- pa19[, cols]
+pa <- pa[, cols]
 
 # Get only "SINGLE FAM DWELLING"
-pa19 <- pa19[pa19$PTYPE==101,]
+pa <- pa[pa$LU_DESC=="SINGLE FAM DWELLING",]
 
 # Convert string "$ddd,ddd.dd" to numeric
-pa19$AV_TOTAL <- as.numeric(gsub('[$,]', '', pa19$AV_TOTAL))
+pa$TOTAL_VALUE <- as.numeric(gsub('[$,]', '', pa$TOTAL_VALUE))
 
-summary(pa19)
+# Map values for OWN_OCC
+pa$OWN_OCC <- mapvalues(pa$OWN_OCC,
+                        from=c("Y", "N"),
+                        to=c("Yes", "No"))
+
+summary(pa)
 ```
 
 # Analyzing the data
 
 ## Analysis
 - Do the analysis as in Module3 for at least one categorical variable and at least one numerical variable. Show appropriate plots for your data.
+
+### Owner Occupied
+```{r echo=TRUE}
+# Categorical variable: OWN_OCC (Dawn)
+own_occ <- table(pa$OWN_OCC)
+
+prop.table(own_occ)*100
+
+plot_ly(x = names(own_occ),
+        y = as.numeric(own_occ),
+        type = "bar"
+        ) %>%
+  layout(title = "Owner Occupied",
+         xaxis = list(categoryorder = "category descending"),
+         yaxis = list(title = "Single Family Dwellings")
+         )
+```
+
+### Full Baths
+```{r echo=TRUE}
+# Numerical variable: FULL_BTH (Dawn)
+full_bth <- table(pa$FULL_BTH)
+full_bth_names <- as.numeric(names(full_bth))
+
+plot_ly(x = full_bth_names,
+        y = as.numeric(full_bth),
+        type = "bar"
+        )%>%
+  layout(title = "Full Bathrooms",
+         xaxis = list(title = "Bathrooms",
+                      tickvals = seq(1:max(full_bth_names))),
+         yaxis = list(title = "Single Family Dwellings")
+  )
+```
 - Do the analysis as in Module3 for at least one set of two or more variables. Show appropriate plots for your data.
 
 ## Distribution
