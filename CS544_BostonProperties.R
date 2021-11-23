@@ -7,6 +7,9 @@ library(plyr)
 ## Read in data
 pa <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-properties/main/pa.csv",colClasses=c("ZIPCODE"="character"))
 
+# Remove duplicate rows
+pa <- pa[!duplicated(pa),]
+
 summary(pa)
 
 ## Analysis
