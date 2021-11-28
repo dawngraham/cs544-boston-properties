@@ -10,6 +10,10 @@ pa <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-proper
 # Remove duplicate rows
 pa <- pa[!duplicated(pa),]
 
+# Derive change in values from 2015 to 2021
+pa$AMT_CHANGE <- pa$VALUE_2021 - pa$VALUE_2015
+pa$PCT_CHANGE <- round(pa$AMT_CHANGE / pa$VALUE_2015 * 100)
+
 summary(pa)
 
 ## Analysis
@@ -60,17 +64,14 @@ fig <- fig %>% layout(title = "2021 Total Assessment Values",
                       yaxis = list(title = ""))
 fig
 
-pa$AMT_CHANGE <- pa$VALUE_2021 - pa$VALUE_2015
-pa$PCT_CHANGE <- round(pa$AMT_CHANGE / pa$VALUE_2015 * 100)
+fig <- plot_ly(pa, y = ~AMT_CHANGE, color = ~CITY, type = "box")
+fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 ($)",
+                      yaxis = list(title = "Change in Dollars"))
+fig
 
 fig <- plot_ly(pa, y = ~PCT_CHANGE, color = ~CITY, type = "box")
 fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 (%)",
                       yaxis = list(title = "Change in Percentage"))
-fig
-
-fig <- plot_ly(pa, y = ~AMT_CHANGE, color = ~CITY, type = "box")
-fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 ($)",
-                      yaxis = list(title = "Change in Dollars"))
 fig
 
 # LIVING_AREA, EXT_COND & TOTAL_VALUE (Sylvie)
@@ -86,12 +87,13 @@ fig <- fig %>% add_trace(pa, y=pa$VALUE_2018, name="2018")
 fig <- fig %>% add_trace(pa, y=pa$VALUE_2019, name="2019")
 fig <- fig %>% add_trace(pa, y=pa$VALUE_2020, name="2020")
 fig <- fig %>% add_trace(pa, y=pa$VALUE_2021, name="2021")
-fig <- fig %>% layout(title = "2021 Total Assessment Values")
+fig <- fig %>% layout(title = "2015-2021 Total Assessment Values")
 fig
 
-plot_ly(pa,
-        x = ~VALUE_2021,
-        type = "histogram")
+fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram")
+fig <- fig %>% layout(title = "2021 Total Assessment Values",
+                      xaxis = list(title = ""))
+fig
 
 ## Central Limit Theorem
 #Draw various random samples of the data and show the applicability of the Central Limit Theorem for this variable.
@@ -104,3 +106,16 @@ plot_ly(pa,
 # Simple random sampling (Sylvie)
 
 # Systematic (Dawn)
+N <- nrow(pa)
+n <- 50
+k <- ceiling(N / n)
+r <- sample(k, 1)
+
+# select every kth item
+s <- seq(r, by = k, length = n)
+sample <- pa[s, ]
+
+fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "Systematic Sampling: 2021 Total Assessment Values",
+                      xaxis = list(title = ""))
+fig
