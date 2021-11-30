@@ -60,7 +60,7 @@ plot_ly(x = names(own_occ),
          )
 
 
-##### Numerical variable: YEAER_BUILT(Sylvie)
+##### Numerical variable: YEAR_BUILT(Sylvie)
 hist1 <- hist( pa$YR_BUILT, breaks = seq(1700,2020, 10), 
                xlim=c(1700,2020), ylim = c(0, 4000), col="blue",
                xlab="Year Built", main="Histogram of Year Built")
@@ -110,7 +110,7 @@ fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 (
                       yaxis = list(title = "Change in Percentage"))
 fig
 
-###### LIVE_AREA, YR_BUILT, BD, BTH & TOTAL_VALUE (Sylvie)
+###### LIVING_AREA, YR_BUILT, BD, BTH & TOTAL_VALUE (Sylvie)
 data <- pa[c(6,7,9,10,17)];data
 pairs(data)
 cor(data)
@@ -140,7 +140,6 @@ fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram")
 fig <- fig %>% layout(title = "2021 Total Assessment Values",
                       xaxis = list(title = ""))
 fig
-
 
 
 ## Central Limit Theorem
@@ -228,13 +227,15 @@ mean(pa$VALUE_2021) - mean(sample2$VALUE_2021)
 
 ###### Systematic (Dawn)
 N <- nrow(pa)
-n <- 50
-k <- ceiling(N / n)
+n <- 500
+k <- floor(N / n)
 r <- sample(k, 1)
 
 # select every kth item
 s <- seq(r, by = k, length = n)
 sample <- pa[s, ]
+
+mean(sample$VALUE_2021)
 
 fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(title = "Systematic Sampling: 2021 Total Assessment Values",

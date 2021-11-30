@@ -97,23 +97,58 @@ Click on the tabs to view associated charts.
 
 #### Year Built
 
+- Most of the single family dwellings were built between 1890 and 1960.
+- The oldest property was built in 1719 and newest was built in 2019. 
+- Year 1900 has the most single family dwellings built.
+
+#### External Condition
+
+
 #### Owner Occupied
 
-The majority of single family dwellings in Boston are owner-occupied as of FY2021.
-
-#### Bedrooms
+- The majority of single family dwellings in Boston are owner-occupied as of FY2021.
 
 #### Full Bathrooms
 
-Most single family dwellings have 1 or 2 full bathrooms, though there are those with more. This includes an outlier listed as having 12 full bathrooms.
+- Most single family dwellings have 1 or 2 full bathrooms, though there are those with more. This includes an outlier listed as having 12 full bathrooms.
+
+#### Correlations
+
+- Total living area seems to have a positive relationship with total assessment values.
+- But year built, number of bedrooms and bathrooms don't seem to have relationship with FY2021 total assessment value.
+- Living area, year built, numbers of bedrooms and bathrooms don't seem to have correlations with each other.
 
 
 Column {.tabset}
 -------------------------------------
-   
+
 ### Year Built
+    
+```{r}
+hist1 <- hist( pa$YR_BUILT, breaks = seq(1700,2020, 10), 
+               xlim=c(1700,2020), ylim = c(0, 4000), col="blue",
+               xlab="Year Built", main="Histogram of Year Built")
+
+axis(at=seq(1700,2050,50),side=1)
+
+text(hist1$mids, 29 + hist1$counts, 
+     labels = hist1$counts, adj = c(0, 0.5), srt = 90)
+```
+
+### External Condition
 
 ```{r}
+t <- table( pa$EXT_COND)
+
+plt <- barplot(t,ylim=c(0,25000),
+               xlab="External Conditions", ylab="Freq.",
+               main="Single Family Dwellings External Conditions Barplot", 
+               col="light blue")
+
+a <- prop.table(t)*100
+
+b <- paste(round(a,2), "%", sep="")
+text(plt, 450+a, labels=b)
 ```   
  
 ### Owner Occupied
@@ -136,11 +171,6 @@ plot_ly(x = names(own_occ),
          )
 ```
 
-### Bedrooms
-    
-```{r}
-```
-
 ### Full Bathrooms
     
 ```{r}
@@ -158,6 +188,15 @@ plot_ly(x = full_bth_names,
          yaxis = list(title = "Single Family Dwellings")
   )
 ```
+
+### Correlations
+    
+```{r}
+# LIVING_AREA, YR_BUILT, BD, BTH & TOTAL_VALUE (Sylvie)
+data <- pa[c(6,7,9,10,17)]
+pairs(data)
+```
+
 
 City & Total Value {data-orientation=rows}
 =====================================
@@ -201,65 +240,48 @@ fig <- fig %>% layout(yaxis = list(title = "Change in Percentage"))
 fig
 ```
 
-Distribution {data-orientation=columns}
-=====================================     
-   
-Column 
--------------------------------------
-    
-### Distribution
-    
-```{r}
-```
-   
+Total Value {data-orientation=columns}
+=====================================
+
 Column
 -------------------------------------
+    
+### Total Assessment Values {data-height=90}
 
-### 2015-2021 Total Assessment Values
+After drawing 8000 samples with different sizes from 300 to 600, the averages of sample means are showing normal distributions. Total assessment values of 2021 does have applicability of the Central Limit Theorem.
 
+### Distribution of FY2021 Total Assessment Values
+    
 ```{r}
 # TOTAL_VALUE (Dawn)
-fig <- plot_ly(pa, y=pa$VALUE_2015, type = "box", name="2015")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2016, name="2016")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2017, name="2017")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2018, name="2018")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2019, name="2019")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2020, name="2020")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2021, name="2021")
-fig
-```   
-   
-### 2021 Total Assessment Values
-
-```{r}
 fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram")
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
-```   
- 
+``` 
 
-Central Limit Theorem {data-orientation=rows}
-=====================================     
-   
-Row {data-height=600}
+Column
 -------------------------------------
 
-### Chart 1
+### Central Limit Theorem
 
 ```{r}
-```
+# TOTAL_VALUE (Sylvie)
+options(scipen=999)
+par(mfrow=c(2,2))
 
-Row {data-height=400}
--------------------------------------
-   
-### Chart 2
+c <- c()
 
-```{r}
-```   
-    
-### Chart 3
+set.seed(2)
 
-```{r}
+for (size in c(300, 400, 500, 600)) {
+  for (i in 1:6000) {
+    c[i] <- mean( sample(pa$VALUE_2021, size = size, replace = F) )
+  }
+  
+  hist(c, prob = T, xlab="inputs",
+       xlim=c(500000,950000), ylim=c(0,0.000014),
+       main = paste("Sample Size =", size))
+}
 ```
 
 Sampling {data-orientation=columns}
@@ -268,13 +290,19 @@ Sampling {data-orientation=columns}
 Column 
 -------------------------------------
     
-### Sampling
-    
-```{r}
-```
-   
-Column
--------------------------------------
+### Sampling FY2021 Total Assessment Values
+
+| Sample | Mean of Total Assessment Values |
+| ---------- | ---- |
+| Full data set | $688,744 |
+| Simple random sampling without replacement (size = 500) | $727,306 |
+| Simple random sampling with replacement (size = 500) | $680,200 |
+| Systematic sampling (size = 500) | $668,534 |
+
+- If using SRS without replacement instead of the whole data set, the mean of the assessment values would be much larger.
+- If using SRS with replacement, the mean of assessment values would be smaller but not that much.
+- With systematic sampling, the mean is less. The difference is smaller than SRS without replacement, but greater than SRS with replacement.
+
 
 ### Distribution of 2021 Total Assessment Values
 
@@ -284,19 +312,49 @@ fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```   
-   
-### Distribution of 2021 Total Assessment Values with Simple Random Sampling
+
+Column
+-------------------------------------
+
+### Simple Random Sampling
 
 ```{r}
+# Simple random sampling without replacement (Sylvie)
+library(sampling)
+library(UsingR)
+
+par(mfrow=c(1,2))
+set.seed(2)
+
+N <- nrow(pa)
+n <- 500
+
+srs <- srswor(n,N)
+
+sample <- pa[srs!= 0,]
+
+hist(sample$VALUE_2021, xlim=c(0,14000000),ylim=c(0,500),
+     xlab="Sampling Assessments", 
+     main="Using SRS without replacement")
+
+# simple random sampling with replacement
+set.seed(2)
+
+srs2 <- srswr(n,N)
+sample2 <- pa[srs2 != 0, ]
+
+hist(sample2$VALUE_2021, xlim=c(0,14000000),ylim=c(0,500),
+     xlab="Sampling Assessments Values", 
+     main="Using SRS with replacement")
 ```   
- 
-### Distribution of 2021 Total Assessment Values with Systematic Sampling
+
+### Systematic Sampling
     
 ```{r}
 # Systematic (Dawn)
 N <- nrow(pa)
-n <- 50
-k <- ceiling(N / n)
+n <- 500
+k <- floor(N / n)
 r <- sample(k, 1)
 
 # select every kth item
@@ -304,6 +362,7 @@ s <- seq(r, by = k, length = n)
 sample <- pa[s, ]
 
 fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
-fig <- fig %>% layout(xaxis = list(title = ""))
+fig <- fig %>% layout(title = "Systematic Sampling: 2021 Total Assessment Values",
+                      xaxis = list(title = ""))
 fig
 ```
