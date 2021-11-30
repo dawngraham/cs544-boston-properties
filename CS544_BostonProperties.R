@@ -61,20 +61,24 @@ plot_ly(x = names(own_occ),
 
 
 ##### Numerical variable: YEAR_BUILT(Sylvie)
-hist1 <- hist( pa$YR_BUILT, breaks = seq(1700,2020, 10), 
-               xlim=c(1700,2020), ylim = c(0, 4000), col="blue",
-               xlab="Year Built", main="Histogram of Year Built")
+pa$YearBuilt <- rep(2019,nrow(pa))-pa$YR_BUILT; pa$YearBuilt 
 
-axis(at=seq(1700,2050,50),side=1)
+hist1 <- hist( pa$YearBuilt, breaks = seq(0,310, 10), 
+               xlim=c(0,310), ylim = c(0, 5000), col="blue",
+               xlab="# of Year Built", main="Histogram of # Year Built")
+
+axis(at=seq(0,310,50),side=1)
 
 text(hist1$mids, 29 + hist1$counts, 
      labels = hist1$counts, adj = c(0, 0.5), srt = 90)
 
+summary(pa$YearBuilt)
 summary(pa$YR_BUILT)
 
-### Most of the single family dwellings were built between 1890 and 1960.
-### The oldest property was built in 1719 and newest was built in 2019. 
-### Year 1900 has the most single family dwellings built. 
+### The oldest property was built in 1710 and newest was built in 2019
+### Most of the single family dwellings were built 50 to 130 years ago.
+### Average age of single family dwellings is 92 years, but with a right-tailed 
+### distribution, the center of the data should be the median which is 94 years.
 
 
 ##### Numerical variable: FULL_BTH (Dawn)
