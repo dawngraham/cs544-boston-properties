@@ -135,7 +135,7 @@ text(hist1$mids, 29 + hist1$counts,
      labels = hist1$counts, adj = c(0, 0.5), srt = 90)
 ```
 
-### Exteriorl Condition
+### Exterior Condition
 
 ```{r}
 t <- table( pa$EXT_COND)
