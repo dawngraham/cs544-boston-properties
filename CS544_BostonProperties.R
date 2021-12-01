@@ -26,8 +26,8 @@ View(pa)
 t <- table( pa$EXT_COND) ;t
 
 plt <- barplot(t,ylim=c(0,25000),
-               xlab="External Conditions", ylab="Freq.",
-               main="Single Family Dwellings External Conditions Barplot", 
+               xlab="Exterior Conditions", ylab="Freq.",
+               main="Single Family Dwellings Exterior Conditions Barplot", 
                col="light blue");plt
 
 a <- prop.table(t)*100 ;a
@@ -81,20 +81,21 @@ summary(pa$YR_BUILT)
 ### distribution, the center of the data should be the median which is 94 years.
 
 
-##### Numerical variable: FULL_BTH (Dawn)
-full_bth <- table(pa$FULL_BTH)
-full_bth_names <- as.numeric(names(full_bth))
+##### Numerical variable: BED_RMS (Dawn)
+bed_rms <- table(pa$BED_RMS)
+bed_rms_names <- as.numeric(names(bed_rms))
 
-plot_ly(x = full_bth_names,
-        y = as.numeric(full_bth),
+plot_ly(x = bed_rms_names,
+        y = as.numeric(bed_rms),
         type = "bar"
         )%>%
-  layout(title = "Full Bathrooms",
-         xaxis = list(title = "Bathrooms",
-                      tickvals = seq(1:max(full_bth_names))),
+  layout(title = "Bedrooms",
+         xaxis = list(title = "Bedrooms",
+                      tickvals = seq(1:max(bed_rms_names))),
          yaxis = list(title = "Single Family Dwellings")
   )
 
+median(pa$BED_RMS, na.rm=T)
 
 #Do the analysis as in Module3 for at least one set of two or more variables. Show appropriate plots for your data.
 

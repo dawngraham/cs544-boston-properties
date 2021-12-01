@@ -5,9 +5,6 @@ output:
   flexdashboard::flex_dashboard:
     vertical_layout: fill
     source_code: embed
-#    theme: 
-#      version: 4
-#      bootswatch: journal
 ---
 
 <style type="text/css">
@@ -24,13 +21,13 @@ Overview
 Column {data-width=600}
 -------------------------------------
     
-### About the Data Set {data-height=90}
+### About the Data Set {data-height=120}
 
 The data used in this project is from the [Analyze Boston Property Assessment](https://data.boston.gov/dataset/property-assessment){target="_blank"} series.
 
 After completing the Data Preparation detailed below, our data set has records for **30,082 single family dwellings in Boston**. These include property information as of FY2021 and total assessment values from FY2015 to FY2021.
 
-### Data Preparation
+### Data Preparation {data-height=500}
 
 ```{r}
 library(plotly)
@@ -95,22 +92,23 @@ Column
     
 Click on the tabs to view associated charts.
 
-#### Year Built
+#### Building Age
 
-- Most of the single family dwellings were built between 1890 and 1960.
-- The oldest property was built in 1719 and newest was built in 2019. 
-- Year 1900 has the most single family dwellings built.
+- The oldest property was built in 1710 and newest was built in 2019
+- Most of the single family dwellings were built 50 to 130 years ago.
+- Average age of single family dwellings is 92 years, but with a right-tailed distribution, the center of the data should be the median which is 94 years.
 
-#### External Condition
+#### Exterior Condition
 
 
 #### Owner Occupied
 
 - The majority of single family dwellings in Boston are owner-occupied as of FY2021.
 
-#### Full Bathrooms
+#### Bedrooms
 
-- Most single family dwellings have 1 or 2 full bathrooms, though there are those with more. This includes an outlier listed as having 12 full bathrooms.
+- The median number of bedrooms in single family dwellings is 3.
+- While most have 2 to 5 bedrooms, there are outliers with up to 12 bedrooms recorded.
 
 #### Correlations
 
@@ -122,27 +120,29 @@ Click on the tabs to view associated charts.
 Column {.tabset}
 -------------------------------------
 
-### Year Built
+### Building Age
     
 ```{r}
-hist1 <- hist( pa$YR_BUILT, breaks = seq(1700,2020, 10), 
-               xlim=c(1700,2020), ylim = c(0, 4000), col="blue",
-               xlab="Year Built", main="Histogram of Year Built")
+pa$YearBuilt <- rep(2019,nrow(pa))-pa$YR_BUILT
 
-axis(at=seq(1700,2050,50),side=1)
+hist1 <- hist( pa$YearBuilt, breaks = seq(0,310, 10), 
+               xlim=c(0,310), ylim = c(0, 5000), col="blue",
+               xlab="Building Age (in Years)", main="Histogram of Building Age")
 
-text(hist1$mids, 35 + hist1$counts, 
+axis(at=seq(0,310,50),side=1)
+
+text(hist1$mids, 29 + hist1$counts, 
      labels = hist1$counts, adj = c(0, 0.5), srt = 90)
 ```
 
-### External Condition
+### Exteriorl Condition
 
 ```{r}
 t <- table( pa$EXT_COND)
 
 plt <- barplot(t,ylim=c(0,25000),
-               xlab="External Conditions", ylab="Freq.",
-               main="Single Family Dwellings External Conditions Barplot", 
+               xlab="Exterior Conditions", ylab="Freq.",
+               main="Single Family Dwellings Exterior Conditions Barplot", 
                col="light blue")
 
 a <- prop.table(t)*100
@@ -171,20 +171,20 @@ plot_ly(x = names(own_occ),
          )
 ```
 
-### Full Bathrooms
+### Bedrooms
     
 ```{r}
-# Numerical variable: FULL_BTH (Dawn)
-full_bth <- table(pa$FULL_BTH)
-full_bth_names <- as.numeric(names(full_bth))
+# Numerical variable: BED_RMS (Dawn)
+bed_rms <- table(pa$BED_RMS)
+bed_rms_names <- as.numeric(names(bed_rms))
 
-plot_ly(x = full_bth_names,
-        y = as.numeric(full_bth),
+plot_ly(x = bed_rms_names,
+        y = as.numeric(bed_rms),
         type = "bar"
         )%>%
-  layout(title = "Full Bathrooms",
-         xaxis = list(title = "Bathrooms",
-                      tickvals = seq(1:max(full_bth_names))),
+  layout(title = "Bedrooms",
+         xaxis = list(title = "Bedrooms",
+                      tickvals = seq(1:max(bed_rms_names))),
          yaxis = list(title = "Single Family Dwellings")
   )
 ```
@@ -290,7 +290,7 @@ Sampling {data-orientation=columns}
 Column 
 -------------------------------------
     
-### Sampling FY2021 Total Assessment Values
+### Sampling FY2021 Total Assessment Values {data-height=200}
 
 | Sample | Mean of Total Assessment Values |
 | ---------- | ---- |
@@ -304,7 +304,7 @@ Column
 - With systematic sampling, the mean is less. The difference is smaller than SRS without replacement, but greater than SRS with replacement.
 
 
-### Distribution of 2021 Total Assessment Values
+### Distribution of 2021 Total Assessment Values {data-height=150}
 
 ```{r}
 # (Dawn)
@@ -316,14 +316,13 @@ fig
 Column
 -------------------------------------
 
-### Simple Random Sampling
+### Simple Random Sampling Without Replacement
 
 ```{r}
 # Simple random sampling without replacement (Sylvie)
 library(sampling)
 library(UsingR)
 
-par(mfrow=c(1,2))
 set.seed(2)
 
 N <- nrow(pa)
@@ -333,19 +332,23 @@ srs <- srswor(n,N)
 
 sample <- pa[srs!= 0,]
 
-hist(sample$VALUE_2021, xlim=c(0,14000000),ylim=c(0,500),
-     xlab="Sampling Assessments", 
-     main="Using SRS without replacement")
+fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
 
+### Simple Random Sampling With Replacement
+
+```{r}
 # simple random sampling with replacement
 set.seed(2)
 
 srs2 <- srswr(n,N)
 sample2 <- pa[srs2 != 0, ]
 
-hist(sample2$VALUE_2021, xlim=c(0,14000000),ylim=c(0,500),
-     xlab="Sampling Assessments Values", 
-     main="Using SRS with replacement")
+fig <- plot_ly(sample2, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
 ```   
 
 ### Systematic Sampling
@@ -362,7 +365,6 @@ s <- seq(r, by = k, length = n)
 sample <- pa[s, ]
 
 fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
-fig <- fig %>% layout(title = "Systematic Sampling: 2021 Total Assessment Values",
-                      xaxis = list(title = ""))
+fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```
