@@ -148,7 +148,7 @@ plt <- barplot(t,ylim=c(0,25000),
 a <- prop.table(t)*100
 
 b <- paste(round(a,2), "%", sep="")
-text(plt, 450+a, labels=b)
+text(plt, 500+a, labels=b)
 ```   
  
 ### Owner Occupied
