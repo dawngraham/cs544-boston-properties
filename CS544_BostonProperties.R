@@ -60,14 +60,14 @@ plot_ly(x = names(own_occ),
          )
 
 
-##### Numerical variable: YEAR_BUILT(Sylvie)
-pa$YearBuilt <- rep(2019,nrow(pa))-pa$YR_BUILT; pa$YearBuilt 
+##### Numerical variable: Property_Age (Sylvie)
+pa$Property_Age <- rep(2021,nrow(pa))-pa$YR_BUILT
 
-hist1 <- hist( pa$YearBuilt, breaks = seq(0,310, 10), 
-               xlim=c(0,310), ylim = c(0, 5000), col="blue",
-               xlab="# of Year Built", main="Histogram of # Year Built")
+hist1 <- hist( pa$Property_Age, breaks = seq(0,320, 10), 
+               xlim=c(0,320), ylim = c(0, 5000), col="blue",
+               xlab="Property Age (in Years)", main="Histogram of Property Age")
 
-axis(at=seq(0,310,50),side=1)
+axis(at=seq(0,320,50),side=1)
 
 text(hist1$mids, 29 + hist1$counts, 
      labels = hist1$counts, adj = c(0, 0.5), srt = 90)
@@ -115,8 +115,8 @@ fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 (
                       yaxis = list(title = "Change in Percentage"))
 fig
 
-###### LIVING_AREA, YR_BUILT, BD, BTH & TOTAL_VALUE (Sylvie)
-data <- pa[c(6,7,9,10,17)];data
+###### LIVING_AREA, Property_Age, BD, BTH & TOTAL_VALUE (Sylvie)
+data <- pa[c(6,20,9,10,17)];data
 pairs(data)
 cor(data)
 
