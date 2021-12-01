@@ -100,6 +100,8 @@ Click on the tabs to view associated charts.
 
 #### Exterior Condition
 
+- Majority of the properties have "Average" condition, following with "Good"
+- Properties with "Excellent" and "Poor" conditions together are less than 0.3% of all the single family dwellings. 
 
 #### Owner Occupied
 
@@ -148,7 +150,7 @@ plt <- barplot(t,ylim=c(0,25000),
 a <- prop.table(t)*100
 
 b <- paste(round(a,2), "%", sep="")
-text(plt, 500+a, labels=b)
+text(plt, 600+a, labels=b)
 ```   
  
 ### Owner Occupied
