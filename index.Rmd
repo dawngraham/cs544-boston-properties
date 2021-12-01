@@ -250,7 +250,7 @@ Column
     
 ### Total Assessment Values {data-height=90}
 
-After drawing 8000 samples with different sizes from 300 to 600, the averages of sample means are showing normal distributions. Total assessment values of 2021 does have applicability of the Central Limit Theorem.
+After drawing 6000 samples with different sizes from 300 to 600, the averages of sample means are showing normal distributions. Total assessment values of 2021 does have applicability of the Central Limit Theorem.
 
 ### Distribution of FY2021 Total Assessment Values
     
