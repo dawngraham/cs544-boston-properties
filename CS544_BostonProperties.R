@@ -25,19 +25,21 @@ View(pa)
 ##### Categorical variable: EXT_COND (Sylvie)
 t <- table( pa$EXT_COND) ;t
 
-plt <- barplot(t,ylim=c(0,25000),
-               xlab="Exterior Conditions", ylab="Freq.",
-               main="Single Family Dwellings Exterior Conditions Barplot", 
+plt <- barplot(t,ylim=c(0,25000), width = c(10,16,10,10,10),
+               xlab="External Conditions", ylab="Freq.",
+               main="Single Family Dwellings External Conditions Barplot", 
                col="light blue");plt
 
 a <- prop.table(t)*100 ;a
 
 b <- paste(round(a,2), "%", sep="") ;b
-text(plt, 450+a, labels=b)
+text(plt, 1600+a, labels=b)
 
-### Most of the single family dwellings were built between 1890 and 1960.
-### The oldest property was built in 1719 and newest was built in 2019. 
-### Year 1900 has the most single family dwellings built. 
+#plt <- plot_ly(pa, x = ~EXT_COND, type = "histogram") ; plt
+
+## Majority of the properties have "Average" condition, following with "Good"
+## Properties with "Excellent" and "Poor" conditions together are 
+## less than 0.3% of all the single family dwellings.
 
 
 ###### Categorical variable: OWN_OCC (Dawn)
@@ -65,7 +67,7 @@ pa$Property_Age <- rep(2021,nrow(pa))-pa$YR_BUILT
 
 hist1 <- hist( pa$Property_Age, breaks = seq(0,320, 10), 
                xlim=c(0,320), ylim = c(0, 5000), col="blue",
-               xlab="Property Age (in Years)", main="Histogram of Property Age")
+               xlab="Property Age (in Years)", main="Single Family Dwellings Age Histogram")
 
 axis(at=seq(0,320,50),side=1)
 
