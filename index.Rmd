@@ -75,7 +75,7 @@ Column {data-width=400}
 | `OWN_OCC` |  One-character code indicating if owner receives residential exemption as an owner-occupied property. |
 | `LIVING_AREA` | Living area square footage of the property. |
 | `YR_BUILT` | Year property was built. |
-| `EXT_COND` | Exterior condition. |
+| `EXT_COND` | External condition. |
 | `BED_RMS` | Total number of bedrooms in the structure. |
 | `FULL_BTH` | Total number of full baths in the structure. |
 | `VALUE_{YEAR}` | Total assessed value for property for the given fiscal year. Originally named `AV_TOTAL` in data sets for FY2015-2020 and `TOTAL_VALUE` for FY2021. |
@@ -99,7 +99,7 @@ Click on the tabs to view associated charts.
 - Most of the single family dwellings were built 50 to 130 years ago.
 - Average age of single family dwellings is 92 years, but with a right-tailed distribution, the center of the data should be the median which is 94 years.
 
-#### Exterior Condition
+#### External Condition
 
 - Majority of the properties have "Average" condition, following with "Good"
 - Properties with "Excellent" and "Poor" conditions together are less than 0.3% of all the single family dwellings. 
@@ -130,7 +130,7 @@ pa$Property_Age <- rep(2021,nrow(pa))-pa$YR_BUILT
 
 hist1 <- hist( pa$Property_Age, breaks = seq(0,320, 10), 
                xlim=c(0,320), ylim = c(0, 5000), col="blue",
-               xlab="Property Age (in Years)", main="Histogram of Property Age")
+               xlab="Property Age (in Years)", main="Single Family Dwellings Age Histogram")
 
 axis(at=seq(0,320,50),side=1)
 
@@ -138,12 +138,12 @@ text(hist1$mids, 29 + hist1$counts,
      labels = hist1$counts, adj = c(0, 0.5), srt = 90)
 ```
 
-### Exterior Condition
+### External Condition
 
 ```{r}
 t <- table( pa$EXT_COND)
 
-plt <- barplot(t,ylim=c(0,25000),
+plt <- barplot(t,ylim=c(0,25000), width = c(10,16,10,10,10),
                xlab="Exterior Conditions", ylab="Freq.",
                main="Single Family Dwellings Exterior Conditions Barplot", 
                col="light blue")
