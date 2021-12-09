@@ -1,3 +1,6 @@
+## CS544 Final Project: Analysis of Boston Property Assessments
+## Sylvie Xiang, Dawn Graham
+
 library(plotly)
 library(plyr)
 
@@ -7,39 +10,36 @@ pa <- read.csv("https://raw.githubusercontent.com/dawngraham/cs544-boston-proper
 # Remove duplicate rows
 pa <- pa[!duplicated(pa),]
 
-nrow(pa)
-length(unique(pa$PID))
-
 # Derive change in values from 2015 to 2021
 pa$AMT_CHANGE <- pa$VALUE_2021 - pa$VALUE_2015
 pa$PCT_CHANGE <- round(pa$AMT_CHANGE / pa$VALUE_2015 * 100)
 
 summary(pa)
-
 View(pa)
 
-### Analysis
-#Do the analysis as in Module3 for at least one categorical variable 
-#and at least one numerical variable. Show appropriate plots for your data.
+
+
+## Analysis
+#Do the analysis as in Module3 for at least one categorical variable and at least one numerical variable. Show appropriate plots for your data.
 
 ##### Categorical variable: EXT_COND (Sylvie)
 t <- table( pa$EXT_COND) ;t
 
-plt <- barplot(t,ylim=c(0,25000),
-               xlab="External Conditions", ylab="Freq.",
-               main="Single Family Dwellings External Conditions Barplot", 
+plt <- barplot(t,ylim=c(0,25000), width = c(10,16,10,10,10),
+               xlab="Exterior Conditions", ylab="Freq.",
+               main="Single Family Dwellings Exterior Conditions Barplot", 
                col="light blue");plt
 
 a <- prop.table(t)*100 ;a
 
 b <- paste(round(a,2), "%", sep="") ;b
-text(plt, 450+a, labels=b)
+text(plt, 1600+a, labels=b)
 
+#plt <- plot_ly(pa, x = ~EXT_COND, type = "histogram") ; plt
 
 ## Majority of the properties have "Average" condition, following with "Good"
 ## Properties with "Excellent" and "Poor" conditions together are 
-## less than 0.3% of all the single family dwellings 
-
+## less than 0.3% of all the single family dwellings.
 
 
 ###### Categorical variable: OWN_OCC (Dawn)
@@ -55,51 +55,53 @@ prop.table(own_occ)*100
 plot_ly(x = names(own_occ),
         y = as.numeric(own_occ),
         type = "bar"
-) %>%
+        ) %>%
   layout(title = "Owner Occupied",
          xaxis = list(categoryorder = "category descending"),
          yaxis = list(title = "Single Family Dwellings")
-  )
+         )
 
 
+##### Numerical variable: Property_Age (Sylvie)
+pa$Property_Age <- rep(2021,nrow(pa))-pa$YR_BUILT
 
-##### Numerical variable: YEAER_BUILT(Sylvie)
-hist1 <- hist( pa$YR_BUILT, breaks = seq(1700,2020, 10), 
-               xlim=c(1700,2020), ylim = c(0, 4000), col="blue",
-               xlab="Year Built", main="Histogram of Year Built")
+hist1 <- hist( pa$Property_Age, breaks = seq(0,320, 10), 
+               xlim=c(0,320), ylim = c(0, 5000), col="blue",
+               xlab="Property Age (in Years)", main="Single Family Dwellings Age Histogram")
 
-axis(at=seq(1700,2050,50),side=1)
+axis(at=seq(0,320,50),side=1)
 
 text(hist1$mids, 29 + hist1$counts, 
      labels = hist1$counts, adj = c(0, 0.5), srt = 90)
 
+summary(pa$YearBuilt)
 summary(pa$YR_BUILT)
 
-### Most of the single family dwellings were built between 1890 and 1960.
-### The oldest property was built in 1719 and newest was built in 2019. 
-### Year 1900 has the most single family dwellings built. 
+### The oldest property was built in 1710 and newest was built in 2019
+### Most of the single family dwellings were built 50 to 130 years ago.
+### Average age of single family dwellings is 92 years, but with a right-tailed 
+### distribution, the center of the data should be the median which is 94 years.
 
 
+##### Numerical variable: BED_RMS (Dawn)
+bed_rms <- table(pa$BED_RMS)
+bed_rms_names <- as.numeric(names(bed_rms))
 
-###### Numerical variable: FULL_BTH (Dawn)
-full_bth <- table(pa$FULL_BTH)
-full_bth_names <- as.numeric(names(full_bth))
-
-plot_ly(x = full_bth_names,
-        y = as.numeric(full_bth),
+plot_ly(x = bed_rms_names,
+        y = as.numeric(bed_rms),
         type = "bar"
-)%>%
-  layout(title = "Full Bathrooms",
-         xaxis = list(title = "Bathrooms",
-                      tickvals = seq(1:max(full_bth_names))),
+        )%>%
+  layout(title = "Bedrooms",
+         xaxis = list(title = "Bedrooms",
+                      tickvals = seq(1:max(bed_rms_names))),
          yaxis = list(title = "Single Family Dwellings")
   )
 
+median(pa$BED_RMS, na.rm=T)
 
-#Do the analysis as in Module3 for at least one set of two or more variables. 
-#Show appropriate plots for your data.
+#Do the analysis as in Module3 for at least one set of two or more variables. Show appropriate plots for your data.
 
-# CITY & TOTAL_VALUE (Dawn)
+##### CITY & TOTAL_VALUE (Dawn)
 fig <- plot_ly(pa, y = ~VALUE_2021, color = ~CITY, type = "box")
 fig <- fig %>% layout(title = "2021 Total Assessment Values",
                       yaxis = list(title = ""))
@@ -115,9 +117,8 @@ fig <- fig %>% layout(title = "Total Assessment Value Change from 2015 to 2021 (
                       yaxis = list(title = "Change in Percentage"))
 fig
 
-
-###### LIVE_AREA, YR_BUILT, BD, BTH & TOTAL_VALUE (Sylvie)
-data <- pa[c(6,7,9,10,17)];data
+###### LIVING_AREA, Property_Age, BD, BTH & TOTAL_VALUE (Sylvie)
+data <- pa[c(6,20,9,10,17)];data
 pairs(data)
 cor(data)
 
@@ -128,10 +129,10 @@ cor(data)
 
 
 
-### Distribution
+## Distribution
 #Pick one variable with numerical data and examine the distribution of the data.
 
-# TOTAL_VALUE (Dawn)
+##### TOTAL_VALUE (Dawn)
 fig <- plot_ly(pa, y=pa$VALUE_2015, type = "box", name="2015")
 fig <- fig %>% add_trace(pa, y=pa$VALUE_2016, name="2016")
 fig <- fig %>% add_trace(pa, y=pa$VALUE_2017, name="2017")
@@ -148,10 +149,8 @@ fig <- fig %>% layout(title = "2021 Total Assessment Values",
 fig
 
 
-
-### Central Limit Theorem
-#Draw various random samples of the data and 
-#show the applicability of the Central Limit Theorem for this variable.
+## Central Limit Theorem
+#Draw various random samples of the data and show the applicability of the Central Limit Theorem for this variable.
 
 ##### TOTAL_VALUE (Sylvie)
 options(scipen=999)
@@ -175,15 +174,14 @@ for (size in c(300, 400, 500, 600)) {
       " SD = ", sd(c), "\n")
 }
 
-### After drawing 8000 samples with different sizes from 300 to 600, 
+### After drawing 6000 samples with different sizes from 300 to 600, 
 ### the averages of sample means are showing normal distributions. 
-### Total assessment values of 2021 does have applicability of Central Limit T.
+### Total assessment values of 2021 does have applicability of Central Limit Theorem.
 
 
 
-### Sampling
-#Show how various sampling methods can be used on your data. 
-#What are your conclusions if these samples are used instead of the whole dataset.
+## Sampling
+#Show how various sampling methods can be used on your data. What are your conclusions if these samples are used instead of the whole dataset.
 
 ##### Simple random sampling without replacement (Sylvie)
 library(sampling)
@@ -203,8 +201,13 @@ hist(sample$VALUE_2021, xlim=c(0,14000000),ylim=c(0,500),
      xlab="Sampling Assessments", 
      main="Using SRS without replace")
 
+# City Representation
+fig <- plot_ly(sample, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "SRS without Replacement: City Representation",
+                      xaxis = list(title = ""))
+fig
 
-## simple random sampling with replacement
+##### simple random sampling with replacement (Sylvie)
 set.seed(2)
 
 srs2 <- srswr(n,N) ;srs2
@@ -227,6 +230,12 @@ mean(pa$VALUE_2021)
 mean(pa$VALUE_2021) - mean(sample$VALUE_2021)
 mean(pa$VALUE_2021) - mean(sample2$VALUE_2021)
 
+# City Representation
+fig <- plot_ly(sample2, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "SRS with Replacement: City Representation",
+                      xaxis = list(title = ""))
+fig
+
 ### The whole data set has mean of assessment values = $688,743.5,
 ### The simple random sampling without replacement has mean of assessment values = $727,306.4,
 ### The simple random sampling with replacement has mean of assessment values =$680,200.
@@ -234,18 +243,54 @@ mean(pa$VALUE_2021) - mean(sample2$VALUE_2021)
 ### If used SRS with replacement, mean of assessment values would be smaller but not that much.
 
 
-
-##### Systematic (Dawn)
+###### Systematic (Dawn)
 N <- nrow(pa)
-n <- 50
-k <- ceiling(N / n)
+n <- 500
+k <- floor(N / n)
 r <- sample(k, 1)
 
 # select every kth item
 s <- seq(r, by = k, length = n)
-sample <- pa[s, ]
+sample.systematic <- pa[s, ]
 
-fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+mean(sample.systematic$VALUE_2021)
+
+fig <- plot_ly(sample.systematic, x = ~VALUE_2021, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(title = "Systematic Sampling: 2021 Total Assessment Values",
+                      xaxis = list(title = ""))
+fig
+
+# City Representation
+fig <- plot_ly(sample.systematic, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "Stratified Sampling: City Representation",
+                      xaxis = list(title = ""))
+fig
+
+###### Stratified (Dawn)
+set.seed(42)
+pa <- pa[order(pa$CITY), ]
+freq <- table(pa$CITY)
+
+# Drop groups that are too small
+pa2 <- pa[!(pa$CITY=="BROOKLINE" | pa$CITY=="DEDHAM"),]
+
+freq <- table(pa2$CITY)
+st.sizes <- 500 * freq / sum(freq)
+st <- sampling::strata(pa2, stratanames = c("CITY"),
+                       size = st.sizes, method = "srswor",
+                       description = TRUE)
+
+sample.stratified <- getdata(pa2, st)
+
+mean(sample.stratified$VALUE_2021)
+
+fig <- plot_ly(sample.stratified, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "Stratified Sampling: 2021 Total Assessment Values",
+                      xaxis = list(title = ""))
+fig
+
+# City Representation
+fig <- plot_ly(sample.stratified, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "Stratified Sampling: City Representation",
                       xaxis = list(title = ""))
 fig

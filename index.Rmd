@@ -5,10 +5,10 @@ output:
   flexdashboard::flex_dashboard:
     vertical_layout: fill
     source_code: embed
-#    theme: 
-#      version: 4
-#      bootswatch: journal
 ---
+
+<!-- Repo: https://github.com/dawngraham/cs544-boston-properties -->
+<!-- Dashboard: https://dawngraham.github.io/cs544-boston-properties/ -->
 
 <style type="text/css">
 
@@ -24,13 +24,13 @@ Overview
 Column {data-width=600}
 -------------------------------------
     
-### About the Data Set {data-height=90}
+### About the Data Set {data-height=120}
 
 The data used in this project is from the [Analyze Boston Property Assessment](https://data.boston.gov/dataset/property-assessment){target="_blank"} series.
 
 After completing the Data Preparation detailed below, our data set has records for **30,082 single family dwellings in Boston**. These include property information as of FY2021 and total assessment values from FY2015 to FY2021.
 
-### Data Preparation
+### Data Preparation {data-height=500}
 
 ```{r}
 library(plotly)
@@ -84,6 +84,7 @@ Column {data-width=400}
 | `VALUE_{YEAR}` | Total assessed value for property for the given fiscal year. Originally named `AV_TOTAL` in data sets for FY2015-2020 and `TOTAL_VALUE` for FY2021. |
 | `AMT_CHANGE` | Amount change in total assessed value between FY2015 and FY2021. (Derived.) |
 | `PCT_CHANGE` | Percent change in total assessed value between FY2015 and FY2021. (Derived.) |
+| `Property_Age` | Age of the property in FY2021. (Derived.) |
 
 Analysis {data-orientation=columns}
 =====================================     
@@ -95,31 +96,70 @@ Column
     
 Click on the tabs to view associated charts.
 
-#### Year Built
+#### Property Age
+
+- The oldest property was built in 1710 and newest was built in 2019
+- Most of the single family dwellings were built 50 to 130 years ago.
+- Average age of single family dwellings is 92 years, but with a right-tailed distribution, the center of the data should be the median which is 94 years.
+
+#### Exterior Condition
+
+- Majority of the properties have "Average" condition, following with "Good"
+- Properties with "Excellent" and "Poor" conditions together are less than 0.3% of all the single family dwellings. 
 
 #### Owner Occupied
 
-The majority of single family dwellings in Boston are owner-occupied as of FY2021.
+- The majority of single family dwellings in Boston are owner-occupied as of FY2021.
 
 #### Bedrooms
 
-#### Full Bathrooms
+- The median number of bedrooms in single family dwellings is 3.
+- While most have 2 to 5 bedrooms, there are outliers with up to 12 bedrooms recorded.
 
-Most single family dwellings have 1 or 2 full bathrooms, though there are those with more. This includes an outlier listed as having 12 full bathrooms.
+#### Correlations
+
+- Total living area seems to have a positive relationship with total assessment values.
+- But year built, number of bedrooms and bathrooms don't seem to have relationship with FY2021 total assessment value.
+- Living area, year built, numbers of bedrooms and bathrooms don't seem to have correlations with each other.
 
 
 Column {.tabset}
 -------------------------------------
-   
-### Year Built
+
+### Property Age
+    
+```{r}
+pa$Property_Age <- rep(2021,nrow(pa))-pa$YR_BUILT
+
+hist1 <- hist( pa$Property_Age, breaks = seq(0,320, 10), 
+               xlim=c(0,320), ylim = c(0, 5000), col="blue",
+               xlab="Property Age (in Years)", main="Single Family Dwellings Age Histogram")
+
+axis(at=seq(0,320,50),side=1)
+
+text(hist1$mids, 29 + hist1$counts, 
+     labels = hist1$counts, adj = c(0, 0.5), srt = 90)
+```
+
+### Exterior Condition
 
 ```{r}
+t <- table( pa$EXT_COND)
+
+plt <- barplot(t,ylim=c(0,25000), width = c(10,16,10,10,10),
+               xlab="Exterior Conditions", ylab="Freq.",
+               main="Single Family Dwellings Exterior Conditions Barplot", 
+               col="light blue")
+
+a <- prop.table(t)*100
+
+b <- paste(round(a,2), "%", sep="")
+text(plt, 1600+a, labels=b)
 ```   
  
 ### Owner Occupied
     
 ```{r}
-# Categorical variable: OWN_OCC (Dawn)
 pa$OWN_OCC <- mapvalues(pa$OWN_OCC,
                         from=c("Y", "N"),
                         to=c("Yes", "No"))
@@ -139,25 +179,28 @@ plot_ly(x = names(own_occ),
 ### Bedrooms
     
 ```{r}
-```
+bed_rms <- table(pa$BED_RMS)
+bed_rms_names <- as.numeric(names(bed_rms))
 
-### Full Bathrooms
-    
-```{r}
-# Numerical variable: FULL_BTH (Dawn)
-full_bth <- table(pa$FULL_BTH)
-full_bth_names <- as.numeric(names(full_bth))
-
-plot_ly(x = full_bth_names,
-        y = as.numeric(full_bth),
+plot_ly(x = bed_rms_names,
+        y = as.numeric(bed_rms),
         type = "bar"
         )%>%
-  layout(title = "Full Bathrooms",
-         xaxis = list(title = "Bathrooms",
-                      tickvals = seq(1:max(full_bth_names))),
+  layout(title = "Bedrooms",
+         xaxis = list(title = "Bedrooms",
+                      tickvals = seq(1:max(bed_rms_names))),
          yaxis = list(title = "Single Family Dwellings")
   )
 ```
+
+### Correlations
+    
+```{r}
+# LIVING_AREA, Property_Age, BD, BTH & TOTAL_VALUE 
+data <- pa[c(6,20,9,10,17)]
+pairs(data)
+```
+
 
 City & Total Value {data-orientation=rows}
 =====================================
@@ -176,7 +219,7 @@ However, it is worth noting that when considering the percent change between the
 ### 2021 Total Assessment Values
     
 ```{r}
-# CITY & TOTAL_VALUE (Dawn)
+# CITY & TOTAL_VALUE 
 fig <- plot_ly(pa, y = ~VALUE_2021, color = ~CITY, type = "box")
 fig <- fig %>% layout(yaxis = list(title = ""))
 fig
@@ -201,65 +244,48 @@ fig <- fig %>% layout(yaxis = list(title = "Change in Percentage"))
 fig
 ```
 
-Distribution {data-orientation=columns}
-=====================================     
-   
-Column 
--------------------------------------
-    
-### Distribution
-    
-```{r}
-```
-   
+Total Value {data-orientation=columns}
+=====================================
+
 Column
 -------------------------------------
+    
+### Total Assessment Values {data-height=90}
 
-### 2015-2021 Total Assessment Values
+After drawing 6000 samples with different sizes from 300 to 600, the averages of sample means are showing normal distributions. Total assessment values of 2021 does have applicability of the Central Limit Theorem.
 
+### Distribution of FY2021 Total Assessment Values
+    
 ```{r}
-# TOTAL_VALUE (Dawn)
-fig <- plot_ly(pa, y=pa$VALUE_2015, type = "box", name="2015")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2016, name="2016")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2017, name="2017")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2018, name="2018")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2019, name="2019")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2020, name="2020")
-fig <- fig %>% add_trace(pa, y=pa$VALUE_2021, name="2021")
-fig
-```   
-   
-### 2021 Total Assessment Values
-
-```{r}
+# TOTAL_VALUE 
 fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram")
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
-```   
- 
+``` 
 
-Central Limit Theorem {data-orientation=rows}
-=====================================     
-   
-Row {data-height=600}
+Column
 -------------------------------------
 
-### Chart 1
+### Central Limit Theorem
 
 ```{r}
-```
+# TOTAL_VALUE 
+options(scipen=999)
+par(mfrow=c(2,2))
 
-Row {data-height=400}
--------------------------------------
-   
-### Chart 2
+c <- c()
 
-```{r}
-```   
-    
-### Chart 3
+set.seed(2)
 
-```{r}
+for (size in c(300, 400, 500, 600)) {
+  for (i in 1:6000) {
+    c[i] <- mean( sample(pa$VALUE_2021, size = size, replace = F) )
+  }
+  
+  hist(c, prob = T, xlab="inputs",
+       xlim=c(500000,950000), ylim=c(0,0.000014),
+       main = paste("Sample Size =", size))
+}
 ```
 
 Sampling {data-orientation=columns}
@@ -268,42 +294,172 @@ Sampling {data-orientation=columns}
 Column 
 -------------------------------------
     
-### Sampling
-    
-```{r}
-```
-   
-Column
--------------------------------------
+### Sampling FY2021 Total Assessment Values {data-height=250}
 
-### Distribution of 2021 Total Assessment Values
+| Sample (size = 500) | Mean of Total Assessment Values |
+| ---------- | -- |
+| Full data set | $688,744 |
+| Simple random sampling without replacement | $727,306 |
+| Simple random sampling with replacement | $680,200 |
+| Systematic sampling | $668,534 |
+| Stratified sampling by City | $713,485 |
+
+- If using SRS without replacement instead of the whole data set, the mean of the assessment values would be much larger.
+- If using SRS with replacement, the mean of assessment values would be smaller but not that much.
+- With systematic sampling, the mean is less. The difference is smaller than SRS without replacement, but greater than SRS with replacement.
+- With stratified sampling by city, the mean is greater, but less than SRS with replacement.
+
+
+### Distribution of 2021 Total Assessment Values {data-height=150}
 
 ```{r}
-# (Dawn)
+
 fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```   
-   
-### Distribution of 2021 Total Assessment Values with Simple Random Sampling
+
+
+Column
+-------------------------------------
+
+### Simple Random Sampling Without Replacement: ATotal Assessment Values
 
 ```{r}
+
+library(sampling)
+library(UsingR)
+
+set.seed(2)
+
+N <- nrow(pa)
+n <- 500
+
+srs <- srswor(n,N)
+
+sample <- pa[srs!= 0,]
+
+fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+### Simple Random Sampling With Replacement: Total Assessment Values
+
+```{r}
+
+set.seed(2)
+
+srs2 <- srswr(n,N)
+sample2 <- pa[srs2 != 0, ]
+
+fig <- plot_ly(sample2, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
 ```   
- 
-### Distribution of 2021 Total Assessment Values with Systematic Sampling
+
+### Systematic Sampling: Total Assessment Values
     
 ```{r}
-# Systematic (Dawn)
+
 N <- nrow(pa)
-n <- 50
-k <- ceiling(N / n)
+n <- 500
+k <- floor(N / n)
 r <- sample(k, 1)
 
 # select every kth item
 s <- seq(r, by = k, length = n)
-sample <- pa[s, ]
+sample.systematic <- pa[s, ]
 
-fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- plot_ly(sample.systematic, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+### Stratified Sampling by City: Total Assessment Values
+    
+```{r, results='hide'}
+
+set.seed(42)
+pa <- pa[order(pa$CITY), ]
+freq <- table(pa$CITY)
+
+# Drop groups that are too small
+pa2 <- pa[!(pa$CITY=="BROOKLINE" | pa$CITY=="DEDHAM"),]
+
+freq <- table(pa2$CITY)
+st.sizes <- 500 * freq / sum(freq)
+st <- sampling::strata(pa2, stratanames = c("CITY"),
+                       size = st.sizes, method = "srswor",
+                       description = TRUE)
+
+sample.stratified <- getdata(pa2, st)
+```
+
+```{r}
+fig <- plot_ly(sample.stratified, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+
+Sampling (City) {data-orientation=columns}
+=====================================     
+   
+Column 
+-------------------------------------
+    
+### Sampling FY2021 Total Assessment Values: City Representation {data-height=150}
+
+These charts show the representation of the cties in each of our samples.
+
+It is worth noting that neither Brookline or Dedham are represented in any of the samples. Both had very few records in the original data set.
+
+Otherwise, all sampling methods actually do well at representing the cities proportionally.
+
+### City Representation {data-height=200}
+
+```{r}
+# Simple random sampling without replacement
+# City Representation
+fig <- plot_ly(pa, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+
+Column
+-------------------------------------
+
+### Simple Random Sampling Without Replacement: City Representation
+
+```{r}
+fig <- plot_ly(sample, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+### Simple Random Sampling With Replacement: City Representation
+
+```{r}
+fig <- plot_ly(sample2, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+
+```   
+
+### Systematic Sampling: City Representation
+    
+```{r}
+fig <- plot_ly(sample.systematic, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+### Stratified Sampling by City: City Representation
+    
+```{r}
+fig <- plot_ly(sample.stratified, x = ~CITY, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```
