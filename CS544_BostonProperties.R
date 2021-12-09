@@ -201,6 +201,11 @@ hist(sample$VALUE_2021, xlim=c(0,14000000),ylim=c(0,500),
      xlab="Sampling Assessments", 
      main="Using SRS without replace")
 
+# City Representation
+fig <- plot_ly(sample, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "SRS without Replacement: City Representation",
+                      xaxis = list(title = ""))
+fig
 
 ## simple random sampling with replacement
 set.seed(2)
@@ -225,6 +230,12 @@ mean(pa$VALUE_2021)
 mean(pa$VALUE_2021) - mean(sample$VALUE_2021)
 mean(pa$VALUE_2021) - mean(sample2$VALUE_2021)
 
+# City Representation
+fig <- plot_ly(sample2, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "SRS with Replacement: City Representation",
+                      xaxis = list(title = ""))
+fig
+
 ### The whole data set has mean of assessment values = $688,743.5,
 ### The simple random sampling without replacement has mean of assessment values = $727,306.4,
 ### The simple random sampling with replacement has mean of assessment values =$680,200.
@@ -240,11 +251,46 @@ r <- sample(k, 1)
 
 # select every kth item
 s <- seq(r, by = k, length = n)
-sample <- pa[s, ]
+sample.systematic <- pa[s, ]
 
-mean(sample$VALUE_2021)
+mean(sample.systematic$VALUE_2021)
 
-fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- plot_ly(sample.systematic, x = ~VALUE_2021, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(title = "Systematic Sampling: 2021 Total Assessment Values",
+                      xaxis = list(title = ""))
+fig
+
+# City Representation
+fig <- plot_ly(sample.systematic, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "Stratified Sampling: City Representation",
+                      xaxis = list(title = ""))
+fig
+
+###### Stratified (Dawn)
+set.seed(42)
+pa <- pa[order(pa$CITY), ]
+freq <- table(pa$CITY)
+
+# Drop groups that are too small
+pa2 <- pa[!(pa$CITY=="BROOKLINE" | pa$CITY=="DEDHAM"),]
+
+freq <- table(pa2$CITY)
+st.sizes <- 500 * freq / sum(freq)
+st <- sampling::strata(pa2, stratanames = c("CITY"),
+                       size = st.sizes, method = "srswor",
+                       description = TRUE)
+
+sample.stratified <- getdata(pa2, st)
+
+mean(sample.stratified$VALUE_2021)
+
+fig <- plot_ly(sample.stratified, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "Stratified Sampling: 2021 Total Assessment Values",
+                      xaxis = list(title = ""))
+fig
+
+# City Representation
+fig <- plot_ly(sample.stratified, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(title = "Stratified Sampling: City Representation",
                       xaxis = list(title = ""))
 fig

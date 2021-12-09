@@ -7,6 +7,9 @@ output:
     source_code: embed
 ---
 
+<!-- Repo: https://github.com/dawngraham/cs544-boston-properties -->
+<!-- Dashboard: https://dawngraham.github.io/cs544-boston-properties/ -->
+
 <style type="text/css">
 
 .chart-title {
@@ -293,18 +296,20 @@ Sampling {data-orientation=columns}
 Column 
 -------------------------------------
     
-### Sampling FY2021 Total Assessment Values {data-height=200}
+### Sampling FY2021 Total Assessment Values {data-height=250}
 
-| Sample | Mean of Total Assessment Values |
-| ---------- | ---- |
+| Sample (size = 500) | Mean of Total Assessment Values |
+| ---------- | -- |
 | Full data set | $688,744 |
-| Simple random sampling without replacement (size = 500) | $727,306 |
-| Simple random sampling with replacement (size = 500) | $680,200 |
-| Systematic sampling (size = 500) | $668,534 |
+| Simple random sampling without replacement | $727,306 |
+| Simple random sampling with replacement | $680,200 |
+| Systematic sampling | $668,534 |
+| Stratified sampling by City | $713,485 |
 
 - If using SRS without replacement instead of the whole data set, the mean of the assessment values would be much larger.
 - If using SRS with replacement, the mean of assessment values would be smaller but not that much.
 - With systematic sampling, the mean is less. The difference is smaller than SRS without replacement, but greater than SRS with replacement.
+- With stratified sampling by city, the mean is greater, but less than SRS with replacement.
 
 
 ### Distribution of 2021 Total Assessment Values {data-height=150}
@@ -316,10 +321,11 @@ fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```   
 
+
 Column
 -------------------------------------
 
-### Simple Random Sampling Without Replacement
+### Simple Random Sampling Without Replacement: ATotal Assessment Values
 
 ```{r}
 # Simple random sampling without replacement (Sylvie)
@@ -340,7 +346,7 @@ fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```
 
-### Simple Random Sampling With Replacement
+### Simple Random Sampling With Replacement: Total Assessment Values
 
 ```{r}
 # simple random sampling with replacement
@@ -354,7 +360,7 @@ fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```   
 
-### Systematic Sampling
+### Systematic Sampling: Total Assessment Values
     
 ```{r}
 # Systematic (Dawn)
@@ -365,9 +371,105 @@ r <- sample(k, 1)
 
 # select every kth item
 s <- seq(r, by = k, length = n)
-sample <- pa[s, ]
+sample.systematic <- pa[s, ]
 
-fig <- plot_ly(sample, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- plot_ly(sample.systematic, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+### Stratified Sampling by City: Total Assessment Values
+    
+```{r, results='hide'}
+# Stratified (Dawn)
+set.seed(42)
+pa <- pa[order(pa$CITY), ]
+freq <- table(pa$CITY)
+
+# Drop groups that are too small
+pa2 <- pa[!(pa$CITY=="BROOKLINE" | pa$CITY=="DEDHAM"),]
+
+freq <- table(pa2$CITY)
+st.sizes <- 500 * freq / sum(freq)
+st <- sampling::strata(pa2, stratanames = c("CITY"),
+                       size = st.sizes, method = "srswor",
+                       description = TRUE)
+
+sample.stratified <- getdata(pa2, st)
+```
+
+```{r}
+fig <- plot_ly(sample.stratified, x = ~VALUE_2021, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+
+Sampling (City) {data-orientation=columns}
+=====================================     
+   
+Column 
+-------------------------------------
+    
+### Sampling FY2021 Total Assessment Values: City Representation {data-height=150}
+
+These charts show the representation of the cties in each of our samples.
+
+It is worth noting that neither Brookline or Dedham are represented in any of the samples. Both had very few records in the original data set.
+
+Otherwise, all sampling methods actually do well at representing the cities proportionally.
+
+### City Representation {data-height=200}
+
+```{r}
+# Simple random sampling without replacement
+# City Representation
+fig <- plot_ly(pa, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+
+Column
+-------------------------------------
+
+### Simple Random Sampling Without Replacement: City Representation
+
+```{r}
+# Simple random sampling without replacement
+# City Representation
+fig <- plot_ly(sample, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+### Simple Random Sampling With Replacement: City Representation
+
+```{r}
+# simple random sampling with replacement
+# City Representation
+fig <- plot_ly(sample2, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+
+```   
+
+### Systematic Sampling: City Representation
+    
+```{r}
+# Systematic (Dawn)
+# City Representation
+fig <- plot_ly(sample.systematic, x = ~CITY, type = "histogram", histnorm='probability')
+fig <- fig %>% layout(xaxis = list(title = ""))
+fig
+```
+
+### Stratified Sampling by City: City Representation
+    
+```{r}
+# Stratified (Dawn)
+# City Representation
+fig <- plot_ly(sample.stratified, x = ~CITY, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
 ```
