@@ -26,8 +26,8 @@ View(pa)
 t <- table( pa$EXT_COND) ;t
 
 plt <- barplot(t,ylim=c(0,25000), width = c(10,16,10,10,10),
-               xlab="External Conditions", ylab="Freq.",
-               main="Single Family Dwellings External Conditions Barplot", 
+               xlab="Exterior Conditions", ylab="Freq.",
+               main="Single Family Dwellings Exterior Conditions Barplot", 
                col="light blue");plt
 
 a <- prop.table(t)*100 ;a
@@ -174,9 +174,9 @@ for (size in c(300, 400, 500, 600)) {
       " SD = ", sd(c), "\n")
 }
 
-### After drawing 8000 samples with different sizes from 300 to 600, 
+### After drawing 6000 samples with different sizes from 300 to 600, 
 ### the averages of sample means are showing normal distributions. 
-### Total assessment values of 2021 does have applicability of Central Limit T.
+### Total assessment values of 2021 does have applicability of Central Limit Theorem.
 
 
 
@@ -207,7 +207,7 @@ fig <- fig %>% layout(title = "SRS without Replacement: City Representation",
                       xaxis = list(title = ""))
 fig
 
-## simple random sampling with replacement
+##### simple random sampling with replacement (Sylvie)
 set.seed(2)
 
 srs2 <- srswr(n,N) ;srs2
