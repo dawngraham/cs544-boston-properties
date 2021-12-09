@@ -160,7 +160,6 @@ text(plt, 1600+a, labels=b)
 ### Owner Occupied
     
 ```{r}
-# Categorical variable: OWN_OCC (Dawn)
 pa$OWN_OCC <- mapvalues(pa$OWN_OCC,
                         from=c("Y", "N"),
                         to=c("Yes", "No"))
@@ -180,7 +179,6 @@ plot_ly(x = names(own_occ),
 ### Bedrooms
     
 ```{r}
-# Numerical variable: BED_RMS (Dawn)
 bed_rms <- table(pa$BED_RMS)
 bed_rms_names <- as.numeric(names(bed_rms))
 
@@ -198,7 +196,7 @@ plot_ly(x = bed_rms_names,
 ### Correlations
     
 ```{r}
-# LIVING_AREA, Property_Age, BD, BTH & TOTAL_VALUE (Sylvie)
+# LIVING_AREA, Property_Age, BD, BTH & TOTAL_VALUE 
 data <- pa[c(6,20,9,10,17)]
 pairs(data)
 ```
@@ -221,7 +219,7 @@ However, it is worth noting that when considering the percent change between the
 ### 2021 Total Assessment Values
     
 ```{r}
-# CITY & TOTAL_VALUE (Dawn)
+# CITY & TOTAL_VALUE 
 fig <- plot_ly(pa, y = ~VALUE_2021, color = ~CITY, type = "box")
 fig <- fig %>% layout(yaxis = list(title = ""))
 fig
@@ -259,7 +257,7 @@ After drawing 6000 samples with different sizes from 300 to 600, the averages of
 ### Distribution of FY2021 Total Assessment Values
     
 ```{r}
-# TOTAL_VALUE (Dawn)
+# TOTAL_VALUE 
 fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram")
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
@@ -271,7 +269,7 @@ Column
 ### Central Limit Theorem
 
 ```{r}
-# TOTAL_VALUE (Sylvie)
+# TOTAL_VALUE 
 options(scipen=999)
 par(mfrow=c(2,2))
 
@@ -315,7 +313,7 @@ Column
 ### Distribution of 2021 Total Assessment Values {data-height=150}
 
 ```{r}
-# (Dawn)
+
 fig <- plot_ly(pa, x = ~VALUE_2021, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
@@ -328,7 +326,7 @@ Column
 ### Simple Random Sampling Without Replacement: ATotal Assessment Values
 
 ```{r}
-# Simple random sampling without replacement (Sylvie)
+
 library(sampling)
 library(UsingR)
 
@@ -349,7 +347,7 @@ fig
 ### Simple Random Sampling With Replacement: Total Assessment Values
 
 ```{r}
-# simple random sampling with replacement
+
 set.seed(2)
 
 srs2 <- srswr(n,N)
@@ -363,7 +361,7 @@ fig
 ### Systematic Sampling: Total Assessment Values
     
 ```{r}
-# Systematic (Dawn)
+
 N <- nrow(pa)
 n <- 500
 k <- floor(N / n)
@@ -381,7 +379,7 @@ fig
 ### Stratified Sampling by City: Total Assessment Values
     
 ```{r, results='hide'}
-# Stratified (Dawn)
+
 set.seed(42)
 pa <- pa[order(pa$CITY), ]
 freq <- table(pa$CITY)
@@ -436,8 +434,6 @@ Column
 ### Simple Random Sampling Without Replacement: City Representation
 
 ```{r}
-# Simple random sampling without replacement
-# City Representation
 fig <- plot_ly(sample, x = ~CITY, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
@@ -446,8 +442,6 @@ fig
 ### Simple Random Sampling With Replacement: City Representation
 
 ```{r}
-# simple random sampling with replacement
-# City Representation
 fig <- plot_ly(sample2, x = ~CITY, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
@@ -457,8 +451,6 @@ fig
 ### Systematic Sampling: City Representation
     
 ```{r}
-# Systematic (Dawn)
-# City Representation
 fig <- plot_ly(sample.systematic, x = ~CITY, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
@@ -467,8 +459,6 @@ fig
 ### Stratified Sampling by City: City Representation
     
 ```{r}
-# Stratified (Dawn)
-# City Representation
 fig <- plot_ly(sample.stratified, x = ~CITY, type = "histogram", histnorm='probability')
 fig <- fig %>% layout(xaxis = list(title = ""))
 fig
